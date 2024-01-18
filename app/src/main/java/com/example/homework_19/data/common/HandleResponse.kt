@@ -7,20 +7,21 @@ import javax.inject.Inject
 
 class HandleResponse @Inject constructor() {
 
-    fun <D : Any> safeApiCall(call: suspend () -> Response<D>): Flow<Resource<D>> = flow {
+    fun <D : Any> handleApiCall(apiCall: suspend () -> Response<D>): Flow<Resource<D>> = flow {
         try {
-            emit(Resource.Loading(loading = true))
-            val response = call()
+            emit(Resource.Loading( true))
+            val response = apiCall()
             val body = response.body()
             if (response.isSuccessful && body != null) {
-                emit(Resource.Success(data = body))
+                emit(Resource.Success(body))
             } else {
-                emit(Resource.Error(errorMessage = response.errorBody()?.string() ?: ""))
+                emit(Resource.Error(response.errorBody()?.string() ?: ""))
             }
         } catch (e: Throwable) {
-            emit(Resource.Error(errorMessage = e.message ?: ""))
+            emit(Resource.Error(e.message ?: ""))
         }
-        emit(Resource.Loading(loading = false))
+
+        emit(Resource.Loading(false))
 
     }
 
